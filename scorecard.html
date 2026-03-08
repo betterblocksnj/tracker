@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BBNJ Council Scorecard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'DM Sans',-apple-system,sans-serif;color:#1a1a2e;line-height:1.6;background:#fafaf7;padding:1.5rem 1.25rem 2rem;max-width:960px;margin:0 auto}
+  .hdr{text-align:center;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:3px solid #1a1a2e}
+  .hdr h1{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(1.75rem,4vw,2.5rem);letter-spacing:-0.02em;line-height:1.15;margin-bottom:0.35rem}
+  .hdr p{color:#6b7280;font-size:0.95rem;max-width:580px;margin:0 auto}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:2rem}
+  .card{background:#fff;border:1px solid #e5e5dd;border-radius:10px;padding:1.25rem 1.5rem;transition:box-shadow 0.2s,border-color 0.2s;position:relative;overflow:hidden}
+  .card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.06);border-color:#ccc}
+  .card.endorsed{border-left:4px solid #1d6fa5}
+  .card .name{font-family:'DM Serif Display',Georgia,serif;font-size:1.15rem;line-height:1.3;margin-bottom:0.15rem}
+  .card .seat{font-size:0.82rem;color:#6b7280;margin-bottom:0.75rem}
+  .card .endorsed-tag{display:inline-block;font-size:0.65rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;padding:0.15rem 0.5rem;border-radius:100px;background:#dbeef9;color:#1d6fa5;margin-left:0.5rem;vertical-align:middle}
+  .stats{display:flex;gap:1rem;margin-bottom:0.75rem}
+  .stat{text-align:center;flex:1}
+  .stat .num{font-size:1.5rem;font-weight:700;line-height:1.2}
+  .stat .lbl{font-size:0.7rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.04em}
+  .num-with{color:#2d6a4f}
+  .num-against{color:#c1292e}
+  .num-absent{color:#9ca3af}
+  .grade-bar{height:8px;background:#e5e5dd;border-radius:4px;overflow:hidden;margin-bottom:0.5rem}
+  .grade-fill{height:100%;border-radius:4px;transition:width 0.6s ease}
+  .grade-a{background:#2d6a4f}
+  .grade-b{background:#6aa84f}
+  .grade-c{background:#e07a36}
+  .grade-d{background:#c1292e}
+  .grade-f{background:#7f1d1d}
+  .grade-none{background:#d1d5db}
+  .grade-row{display:flex;justify-content:space-between;align-items:center}
+  .grade-pct{font-size:0.85rem;font-weight:600;color:#6b7280}
+  .grade-letter{font-size:1.1rem;font-weight:700;padding:0.1rem 0.5rem;border-radius:6px;color:#fff}
+  .gl-a{background:#2d6a4f}
+  .gl-b{background:#6aa84f}
+  .gl-c{background:#e07a36}
+  .gl-d{background:#c1292e}
+  .gl-f{background:#7f1d1d}
+  .gl-none{background:#d1d5db}
+  .no-data{font-size:0.82rem;color:#9ca3af;font-style:italic;text-align:center;padding:1rem 0}
+  .foot{text-align:center;margin-top:2rem;padding-top:1.25rem;border-top:2px solid #e5e5dd;font-size:0.82rem;color:#6b7280}
+  .foot a{color:#2d6a4f;text-decoration:none;font-weight:600}
+  .empty{text-align:center;padding:3rem 1rem;color:#6b7280}
+  .legend{text-align:center;font-size:0.8rem;color:#6b7280;margin-bottom:2rem;padding:0.6rem 1rem;background:#fff;border:1px solid #e5e5dd;border-radius:8px}
+  @media(max-width:600px){.grid{grid-template-columns:1fr}.stats{gap:0.5rem}}
+</style>
+</head>
+<body>
+  <div class="hdr">
+    <h1>Council Member Scorecard</h1>
+    <p>How often does each council member vote with the Better Blocks position?</p>
+  </div>
+
+  <div class="legend">
+    Grade scale: <strong>A</strong> = &gt;80% &nbsp; <strong>B</strong> = 60–80% &nbsp; <strong>C</strong> = 40–60% &nbsp; <strong>D</strong> = 20–40% &nbsp; <strong>F</strong> = &lt;20%
+  </div>
+
+  <div class="grid" id="scoreGrid"></div>
+
+  <div class="foot">Maintained by <a href="https://betterblocksnj.org" target="_blank">Better Blocks New Jersey</a></div>
+
+<script>
+(function(){
+  var CSV='https://docs.google.com/spreadsheets/d/e/2PACX-1vSgHURboOC54C3uPH2xvU54MiOji3Hb4KdizGD4ffgXdNE3wI7C7jgI4xJ3R2oF2UwfjhQxHCRJY7jB/pub?gid=1365066021&single=true&output=csv';
+  var grid=document.getElementById('scoreGrid');
+  if(!grid)return;
+
+  function pc(t){var r=[],c='',q=false,ls=t.split('\n');for(var i=0;i<ls.length;i++){if(q){c+='\n'+ls[i]}else{c=ls[i]}var qc=(c.match(/"/g)||[]).length;q=qc%2!==0;if(!q){r.push(pr(c));c=''}}return r}
+  function pr(r){var c=[],u='',q=false;for(var i=0;i<r.length;i++){var h=r[i];if(q){if(h==='"'&&r[i+1]==='"'){u+='"';i++}else if(h==='"'){q=false}else{u+=h}}else{if(h==='"'){q=true}else if(h===','){c.push(u.trim());u=''}else{u+=h}}}c.push(u.trim());return c}
+
+  function gradeClass(pct){
+    if(isNaN(pct))return'grade-none';
+    if(pct>80)return'grade-a';if(pct>=60)return'grade-b';if(pct>=40)return'grade-c';if(pct>=20)return'grade-d';return'grade-f'
+  }
+  function gradeLetterClass(pct){
+    if(isNaN(pct))return'gl-none';
+    if(pct>80)return'gl-a';if(pct>=60)return'gl-b';if(pct>=40)return'gl-c';if(pct>=20)return'gl-d';return'gl-f'
+  }
+  function gradeLetter(pct){
+    if(isNaN(pct))return'–';
+    if(pct>80)return'A';if(pct>=60)return'B';if(pct>=40)return'C';if(pct>=20)return'D';return'F'
+  }
+
+  grid.innerHTML='<div class="empty">Loading scorecard…</div>';
+  fetch(CSV).then(function(r){if(!r.ok)throw new Error('err');return r.text()}).then(function(csv){
+    var rows=pc(csv);
+    // Find header row
+    var hi=-1;
+    for(var i=0;i<rows.length;i++){if(rows[i][0]&&rows[i][0].toLowerCase().indexOf('council member')!==-1){hi=i;break}}
+    if(hi===-1){grid.innerHTML='<div class="empty">Could not parse scorecard data.</div>';return}
+    var data=rows.slice(hi+1).filter(function(r){return r[0]&&r[0].trim()&&r[0].toLowerCase().indexOf('instruction')===-1});
+    if(!data.length){grid.innerHTML='<div class="empty">No scorecard data yet.</div>';return}
+
+    grid.innerHTML=data.map(function(r){
+      function g(i){return(r[i]||'').trim()}
+      var name=g(0),seat=g(1),endorsed=g(2).toLowerCase()==='yes';
+      var total=parseInt(g(3))||0,withB=parseInt(g(4))||0,against=parseInt(g(5))||0,absent=parseInt(g(6))||0;
+      var pct=g(7)?parseFloat(g(7)):NaN;
+      if(isNaN(pct)&&total>0)pct=Math.round((withB/total)*100);
+      var grade=g(12)||gradeLetter(pct);
+      var hasData=total>0;
+
+      return'<div class="card'+(endorsed?' endorsed':'')+'">'+
+        '<div class="name">'+name+(endorsed?'<span class="endorsed-tag">BBNJ Endorsed</span>':'')+'</div>'+
+        '<div class="seat">'+seat+'</div>'+
+        (hasData?
+          '<div class="stats">'+
+            '<div class="stat"><div class="num num-with">'+withB+'</div><div class="lbl">With BBNJ</div></div>'+
+            '<div class="stat"><div class="num num-against">'+against+'</div><div class="lbl">Against</div></div>'+
+            '<div class="stat"><div class="num num-absent">'+absent+'</div><div class="lbl">Absent</div></div>'+
+          '</div>'+
+          '<div class="grade-bar"><div class="grade-fill '+gradeClass(pct)+'" style="width:'+Math.max(pct,3)+'%"></div></div>'+
+          '<div class="grade-row"><span class="grade-pct">'+(isNaN(pct)?'–':pct+'%')+' alignment</span><span class="grade-letter '+gradeLetterClass(pct)+'">'+grade+'</span></div>'
+        :
+          '<div class="no-data">No votes recorded yet</div>'
+        )+
+      '</div>'
+    }).join('')
+  }).catch(function(e){console.error(e);grid.innerHTML='<div class="empty">Unable to load data. Please refresh.</div>'})
+})();
+</script>
+</body>
+</html>

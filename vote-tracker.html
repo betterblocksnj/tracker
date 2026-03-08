@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BBNJ Vote Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'DM Sans',-apple-system,sans-serif;color:#1a1a2e;line-height:1.6;background:#fafaf7;padding:1.5rem 1.25rem 2rem;max-width:1100px;margin:0 auto}
+  .hdr{text-align:center;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:3px solid #1a1a2e}
+  .hdr h1{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(1.75rem,4vw,2.5rem);letter-spacing:-0.02em;line-height:1.15;margin-bottom:0.35rem}
+  .hdr p{color:#6b7280;font-size:0.95rem;max-width:580px;margin:0 auto}
+  .key{display:flex;flex-wrap:wrap;gap:0.75rem 1.5rem;justify-content:center;margin-bottom:2rem;font-size:0.8rem;color:#6b7280;padding:0.75rem 1rem;background:#fff;border:1px solid #e5e5dd;border-radius:8px}
+  .key span{display:flex;align-items:center;gap:0.3rem}
+  .key .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .dot-y{background:#2d6a4f}
+  .dot-n{background:#c1292e}
+  .dot-a{background:#9ca3af}
+  .dot-ab{background:#e07a36}
+  .dot-endorsed{background:#1d6fa5}
+  .tbl-wrap{overflow-x:auto;margin-bottom:2rem;border-radius:10px;border:1px solid #e5e5dd}
+  table{width:100%;border-collapse:collapse;background:#fff;font-size:0.85rem}
+  thead th{background:#1a1a2e;color:#fff;padding:0.7rem 0.6rem;text-align:center;font-weight:600;font-size:0.75rem;letter-spacing:0.03em;text-transform:uppercase;position:sticky;top:0}
+  thead th:first-child,thead th:nth-child(2),thead th:nth-child(3){text-align:left}
+  thead th.endorsed{background:#1d4e7a}
+  tbody td{padding:0.65rem 0.6rem;text-align:center;border-bottom:1px solid #f0f0ec}
+  tbody td:first-child{font-weight:600;text-align:left;white-space:nowrap}
+  tbody td:nth-child(2){text-align:left;max-width:280px}
+  tbody td:nth-child(3){text-align:left}
+  tbody tr:hover{background:#f7f7f3}
+  .vote{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-weight:700;font-size:0.75rem;color:#fff}
+  .v-y{background:#2d6a4f}
+  .v-n{background:#c1292e}
+  .v-a{background:#9ca3af}
+  .v-ab{background:#e07a36}
+  .v-empty{background:transparent;color:#d1d5db;border:2px dashed #e5e5dd}
+  .pos{font-size:0.7rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;padding:0.15rem 0.5rem;border-radius:100px;white-space:nowrap}
+  .pos-support{background:#d8f3dc;color:#2d6a4f}
+  .pos-oppose{background:#fce4e4;color:#c1292e}
+  .pos-amend{background:#fde8d0;color:#e07a36}
+  .result-pass{color:#2d6a4f;font-weight:700}
+  .result-fail{color:#c1292e;font-weight:700}
+  .result-pending{color:#6b7280;font-style:italic}
+  .notes{font-size:0.78rem;color:#6b7280;max-width:180px}
+  .foot{text-align:center;margin-top:2rem;padding-top:1.25rem;border-top:2px solid #e5e5dd;font-size:0.82rem;color:#6b7280}
+  .foot a{color:#2d6a4f;text-decoration:none;font-weight:600}
+  .empty{text-align:center;padding:3rem 1rem;color:#6b7280}
+  @media(max-width:768px){table{font-size:0.78rem}thead th,tbody td{padding:0.5rem 0.4rem}.vote{width:24px;height:24px;font-size:0.7rem}}
+</style>
+</head>
+<body>
+  <div class="hdr">
+    <h1>Council Vote Tracker</h1>
+    <p>Tracking Jersey City Council votes on housing, transit, street safety, and parks.</p>
+  </div>
+
+  <div class="key">
+    <span><span class="dot dot-y"></span> Yes (with BBNJ)</span>
+    <span><span class="dot dot-n"></span> No (against BBNJ)</span>
+    <span><span class="dot dot-a"></span> Absent</span>
+    <span><span class="dot dot-ab"></span> Abstain</span>
+    <span><span class="dot dot-endorsed"></span> BBNJ Endorsed</span>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Ordinance / Resolution</th>
+          <th>BBNJ Position</th>
+          <th class="endorsed">Ridley<br><small>Ward A</small></th>
+          <th>Brooks<br><small>Ward B</small></th>
+          <th class="endorsed">Zuppa<br><small>Ward C</small></th>
+          <th>Ephros<br><small>Ward D</small></th>
+          <th class="endorsed">Little<br><small>Ward E</small></th>
+          <th>Gilmore<br><small>Ward F</small></th>
+          <th>Lavarro<br><small>At-Lg</small></th>
+          <th>Griffin<br><small>At-Lg</small></th>
+          <th>Singh<br><small>At-Lg</small></th>
+          <th>Solomon<br><small>Mayor</small></th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody id="voteBody"></tbody>
+    </table>
+  </div>
+
+  <div class="foot">Maintained by <a href="https://betterblocksnj.org" target="_blank">Better Blocks New Jersey</a></div>
+
+<script>
+(function(){
+  var CSV='https://docs.google.com/spreadsheets/d/e/2PACX-1vSgHURboOC54C3uPH2xvU54MiOji3Hb4KdizGD4ffgXdNE3wI7C7jgI4xJ3R2oF2UwfjhQxHCRJY7jB/pub?gid=0&single=true&output=csv';
+  var tb=document.getElementById('voteBody');
+  if(!tb)return;
+
+  function pc(t){var r=[],c='',q=false,ls=t.split('\n');for(var i=0;i<ls.length;i++){if(q){c+='\n'+ls[i]}else{c=ls[i]}var qc=(c.match(/"/g)||[]).length;q=qc%2!==0;if(!q){r.push(pr(c));c=''}}return r}
+  function pr(r){var c=[],u='',q=false;for(var i=0;i<r.length;i++){var h=r[i];if(q){if(h==='"'&&r[i+1]==='"'){u+='"';i++}else if(h==='"'){q=false}else{u+=h}}else{if(h==='"'){q=true}else if(h===','){c.push(u.trim());u=''}else{u+=h}}}c.push(u.trim());return c}
+
+  function voteHTML(v){
+    if(!v)return'<span class="vote v-empty">–</span>';
+    var l=v.trim().toUpperCase();
+    if(l==='Y')return'<span class="vote v-y">Y</span>';
+    if(l==='N')return'<span class="vote v-n">N</span>';
+    if(l==='A')return'<span class="vote v-a">A</span>';
+    if(l==='AB')return'<span class="vote v-ab">AB</span>';
+    return'<span class="vote v-empty">–</span>';
+  }
+  function posHTML(p){
+    if(!p)return'';
+    var l=p.toLowerCase();
+    if(l.indexOf('support')!==-1)return'<span class="pos pos-support">✔ Support</span>';
+    if(l.indexOf('oppose')!==-1)return'<span class="pos pos-oppose">✘ Oppose</span>';
+    if(l.indexOf('amend')!==-1)return'<span class="pos pos-amend">✘ Amend</span>';
+    return'<span class="pos">'+p+'</span>';
+  }
+
+  tb.innerHTML='<tr><td colspan="14" class="empty">Loading votes…</td></tr>';
+  fetch(CSV).then(function(r){if(!r.ok)throw new Error('err');return r.text()}).then(function(csv){
+    var rows=pc(csv);
+    // Find header row with #
+    var hi=-1;
+    for(var i=0;i<rows.length;i++){if(rows[i][0]&&rows[i][0].trim()==='#'){hi=i;break}}
+    if(hi===-1){tb.innerHTML='<tr><td colspan="14" class="empty">Could not parse vote data.</td></tr>';return}
+    // Skip endorsement row
+    var data=rows.slice(hi+1).filter(function(r){return r[0]&&r[0].trim()&&r[0].trim()!==''&&!isNaN(parseInt(r[0].trim()))});
+    if(!data.length){tb.innerHTML='<tr><td colspan="14" class="empty">No votes recorded yet. Check back after the next council meeting.</td></tr>';return}
+    tb.innerHTML=data.map(function(r){
+      function g(i){return(r[i]||'').trim()}
+      var res=g(16);
+      var resCls=res.toLowerCase().indexOf('pass')!==-1?'result-pass':res.toLowerCase().indexOf('fail')!==-1?'result-fail':'result-pending';
+      return'<tr><td>'+g(0)+'</td><td>'+g(2)+'</td><td>'+posHTML(g(5))+'</td>'+
+        '<td>'+voteHTML(g(6))+'</td><td>'+voteHTML(g(7))+'</td><td>'+voteHTML(g(8))+'</td>'+
+        '<td>'+voteHTML(g(9))+'</td><td>'+voteHTML(g(10))+'</td><td>'+voteHTML(g(11))+'</td>'+
+        '<td>'+voteHTML(g(12))+'</td><td>'+voteHTML(g(13))+'</td><td>'+voteHTML(g(14))+'</td>'+
+        '<td>'+voteHTML(g(15))+'</td>'+
+        '<td class="'+resCls+'">'+(res||'Pending')+'</td></tr>'
+    }).join('')
+  }).catch(function(e){console.error(e);tb.innerHTML='<tr><td colspan="14" class="empty">Unable to load data. Please refresh.</td></tr>'})
+})();
+</script>
+</body>
+</html>
