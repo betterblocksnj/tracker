@@ -7,29 +7,29 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'DM Sans',-apple-system,sans-serif;color:#1a1a2e;line-height:1.6;background:#fafaf7;padding:1.5rem 1.25rem 2rem;max-width:1100px;margin:0 auto}
-  .hdr{text-align:center;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:3px solid #1a1a2e}
-  .hdr h1{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(1.75rem,4vw,2.5rem);letter-spacing:-0.02em;line-height:1.15;margin-bottom:0.35rem}
-  .hdr p{color:#6b7280;font-size:0.95rem;max-width:580px;margin:0 auto}
-  .key{display:flex;flex-wrap:wrap;gap:0.75rem 1.5rem;justify-content:center;margin-bottom:2rem;font-size:0.8rem;color:#6b7280;padding:0.75rem 1rem;background:#fff;border:1px solid #e5e5dd;border-radius:8px}
-  .key span{display:flex;align-items:center;gap:0.3rem}
-  .key .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+  body{font-family:'DM Sans',-apple-system,sans-serif;color:#1a1a2e;line-height:1.6;background:#fafaf7;padding:1rem 0.75rem 2rem;max-width:100%;margin:0 auto}
+  .hdr{text-align:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:3px solid #1a1a2e}
+  .hdr h1{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(1.5rem,3.5vw,2.2rem);letter-spacing:-0.02em;line-height:1.15;margin-bottom:0.35rem}
+  .hdr p{color:#6b7280;font-size:0.85rem;max-width:520px;margin:0 auto}
+  .key{display:flex;flex-wrap:wrap;gap:0.5rem 1rem;justify-content:center;margin-bottom:1.5rem;font-size:0.72rem;color:#6b7280;padding:0.6rem 0.75rem;background:#fff;border:1px solid #e5e5dd;border-radius:8px}
+  .key span{display:flex;align-items:center;gap:0.25rem}
+  .key .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
   .dot-y{background:#2d6a4f}.dot-n{background:#c1292e}.dot-a{background:#9ca3af}.dot-ab{background:#e07a36}.dot-endorsed{background:#1d6fa5}
   .tbl-wrap{overflow-x:auto;margin-bottom:2rem;border-radius:10px;border:1px solid #e5e5dd}
-  table{width:100%;border-collapse:collapse;background:#fff;font-size:0.85rem}
-  thead th{background:#1a1a2e;color:#fff;padding:0.7rem 0.6rem;text-align:center;font-weight:600;font-size:0.75rem;letter-spacing:0.03em;text-transform:uppercase;position:sticky;top:0}
+  table{width:100%;border-collapse:collapse;background:#fff;font-size:0.75rem}
+  thead th{background:#1a1a2e;color:#fff;padding:0.5rem 0.35rem;text-align:center;font-weight:600;font-size:0.65rem;letter-spacing:0.03em;text-transform:uppercase;position:sticky;top:0}
   thead th:first-child,thead th:nth-child(2),thead th:nth-child(3){text-align:left}
   thead th.endorsed{background:#1d4e7a}
-  tbody td{padding:0.65rem 0.6rem;text-align:center;border-bottom:1px solid #f0f0ec}
+  tbody td{padding:0.45rem 0.35rem;text-align:center;border-bottom:1px solid #f0f0ec}
   tbody td:first-child{font-weight:600;text-align:left;white-space:nowrap}
-  tbody td:nth-child(2){text-align:left;max-width:280px}
+  tbody td:nth-child(2){text-align:left;max-width:160px}
   tbody td:nth-child(3){text-align:left}
-  tbody td:last-child{text-align:left;font-size:0.8rem;color:#6b7280;max-width:200px}
+  tbody td:last-child{text-align:left;font-size:0.7rem;color:#6b7280;max-width:140px}
   tbody tr:hover{background:#f7f7f3}
-  .vote{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-weight:700;font-size:0.75rem;color:#fff}
+  .vote{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-weight:700;font-size:0.65rem;color:#fff}
   .v-y{background:#2d6a4f}.v-n{background:#c1292e}.v-a{background:#9ca3af}.v-ab{background:#e07a36}
   .v-empty{background:transparent;color:#d1d5db;border:2px dashed #e5e5dd}
-  .pos{font-size:0.7rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;padding:0.15rem 0.5rem;border-radius:100px;white-space:nowrap}
+  .pos{font-size:0.6rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:0.12rem 0.4rem;border-radius:100px;white-space:nowrap}
   .pos-support{background:#d8f3dc;color:#2d6a4f}.pos-oppose{background:#fce4e4;color:#c1292e}.pos-amend{background:#fde8d0;color:#e07a36}
   .result-pass{color:#2d6a4f;font-weight:700}.result-fail{color:#c1292e;font-weight:700}.result-pending{color:#6b7280;font-style:italic}
   .foot{text-align:center;margin-top:2rem;padding-top:1.25rem;border-top:2px solid #e5e5dd;font-size:0.82rem;color:#6b7280}
