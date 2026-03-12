@@ -24,6 +24,7 @@
   tbody td:first-child{font-weight:600;text-align:left;white-space:nowrap}
   tbody td:nth-child(2){text-align:left;max-width:280px}
   tbody td:nth-child(3){text-align:left}
+  tbody td:last-child{text-align:left;font-size:0.8rem;color:#6b7280;max-width:200px}
   tbody tr:hover{background:#f7f7f3}
   .vote{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-weight:700;font-size:0.75rem;color:#fff}
   .v-y{background:#2d6a4f}.v-n{background:#c1292e}.v-a{background:#9ca3af}.v-ab{background:#e07a36}
@@ -63,50 +64,52 @@ fetch(csvUrl)
   })
   .then(function(text) {
     if (!text || text.length < 5) {
-      out.innerHTML = '<div class="msg">No data received. The Vote Tracker tab may not be published yet.</div>';
+      out.innerHTML = '<div class="msg">No data received.</div>';
       return;
     }
 
-    var lines = text.split('\n');
+    // Parse CSV handling multi-line quoted fields
     var rows = [];
-    for (var i = 0; i < lines.length; i++) {
-      var cells = [];
-      var cur = '';
-      var inQ = false;
-      var line = lines[i];
-      for (var j = 0; j < line.length; j++) {
-        var ch = line[j];
-        if (inQ) {
-          if (ch === '"' && line[j+1] === '"') { cur += '"'; j++; }
-          else if (ch === '"') { inQ = false; }
-          else { cur += ch; }
-        } else {
-          if (ch === '"') { inQ = true; }
-          else if (ch === ',') { cells.push(cur.trim()); cur = ''; }
-          else { cur += ch; }
+    var current = '';
+    var inQuotes = false;
+    var lines = text.split('\n');
+    for (var li = 0; li < lines.length; li++) {
+      if (inQuotes) { current += '\n' + lines[li]; } else { current = lines[li]; }
+      var qc = (current.match(/"/g) || []).length;
+      inQuotes = qc % 2 !== 0;
+      if (!inQuotes) {
+        var cells = [];
+        var cur = '';
+        var q = false;
+        for (var j = 0; j < current.length; j++) {
+          var ch = current[j];
+          if (q) {
+            if (ch === '"' && current[j+1] === '"') { cur += '"'; j++; }
+            else if (ch === '"') { q = false; }
+            else { cur += ch; }
+          } else {
+            if (ch === '"') { q = true; }
+            else if (ch === ',') { cells.push(cur.trim()); cur = ''; }
+            else { cur += ch; }
+          }
         }
+        cells.push(cur.trim());
+        rows.push(cells);
+        current = '';
       }
-      cells.push(cur.trim());
-      rows.push(cells);
     }
 
+    // Find header row containing #
     var hi = -1;
     for (var i = 0; i < rows.length; i++) {
       if (rows[i][0] && rows[i][0].trim() === '#') { hi = i; break; }
     }
     if (hi === -1) {
-      for (var i = 0; i < rows.length; i++) {
-        for (var j = 0; j < rows[i].length; j++) {
-          if (rows[i][j] && rows[i][j].toLowerCase().indexOf('ordinance') !== -1) { hi = i; break; }
-        }
-        if (hi !== -1) break;
-      }
-    }
-    if (hi === -1) {
-      out.innerHTML = '<div class="msg">Could not find vote data headers in the spreadsheet.</div>';
+      out.innerHTML = '<div class="msg">Could not find vote data headers.</div>';
       return;
     }
 
+    // Get numbered data rows (skip endorsement row)
     var data = [];
     for (var i = hi + 1; i < rows.length; i++) {
       var first = (rows[i][0] || '').trim();
@@ -118,13 +121,17 @@ fetch(csvUrl)
       return;
     }
 
+    // Columns: 0=#, 1=Date, 2=Ordinance, 3=Topic, 4=BBNJ Position,
+    // 5=Ridley, 6=Brooks, 7=Zuppa, 8=Ephros, 9=Little, 10=Gilmore,
+    // 11=Lavarro, 12=Griffin, 13=Singh, 14=Result, 15=Notes
+
     function vt(val) {
       if (!val) return '<span class="vote v-empty">–</span>';
-      var u = val.trim().toUpperCase();
-      if (u === 'Y') return '<span class="vote v-y">Y</span>';
-      if (u === 'N') return '<span class="vote v-n">N</span>';
-      if (u === 'A') return '<span class="vote v-a">A</span>';
-      if (u === 'AB') return '<span class="vote v-ab">AB</span>';
+      var u = val.trim().toLowerCase();
+      if (u === 'y' || u === 'yes') return '<span class="vote v-y">Y</span>';
+      if (u === 'n' || u === 'no') return '<span class="vote v-n">N</span>';
+      if (u === 'a' || u === 'absent') return '<span class="vote v-a">A</span>';
+      if (u === 'ab' || u === 'abstain') return '<span class="vote v-ab">AB</span>';
       return '<span class="vote v-empty">–</span>';
     }
     function ps(val) {
@@ -147,19 +154,30 @@ fetch(csvUrl)
       '<th>Lavarro<br><small>At-Lg</small></th>' +
       '<th>Griffin<br><small>At-Lg</small></th>' +
       '<th>Singh<br><small>At-Lg</small></th>' +
-      '<th>Solomon<br><small>Mayor</small></th>' +
-      '<th>Result</th></tr></thead><tbody>';
+      '<th>Result</th>' +
+      '<th>Notes</th></tr></thead><tbody>';
 
     for (var i = 0; i < data.length; i++) {
       var r = data[i];
-      var res = (r[15] || '').trim();
+      var g = function(idx) { return (r[idx] || '').trim(); };
+      var res = g(14);
       var cls = res.toLowerCase().indexOf('pass') !== -1 ? 'result-pass' : res.toLowerCase().indexOf('fail') !== -1 ? 'result-fail' : 'result-pending';
-      h += '<tr><td>' + (r[0]||'').trim() + '</td><td>' + (r[2]||'').trim() + '</td><td>' + ps((r[4]||'').trim()) + '</td>' +
-        '<td>' + vt((r[5]||'').trim()) + '</td><td>' + vt((r[6]||'').trim()) + '</td><td>' + vt((r[7]||'').trim()) + '</td>' +
-        '<td>' + vt((r[8]||'').trim()) + '</td><td>' + vt((r[9]||'').trim()) + '</td><td>' + vt((r[10]||'').trim()) + '</td>' +
-        '<td>' + vt((r[11]||'').trim()) + '</td><td>' + vt((r[12]||'').trim()) + '</td><td>' + vt((r[13]||'').trim()) + '</td>' +
-        '<td>' + vt((r[14]||'').trim()) + '</td>' +
-        '<td class="' + cls + '">' + (res || 'Pending') + '</td></tr>';
+      h += '<tr>' +
+        '<td>' + g(0) + '</td>' +
+        '<td>' + g(2) + '</td>' +
+        '<td>' + ps(g(4)) + '</td>' +
+        '<td>' + vt(g(5)) + '</td>' +
+        '<td>' + vt(g(6)) + '</td>' +
+        '<td>' + vt(g(7)) + '</td>' +
+        '<td>' + vt(g(8)) + '</td>' +
+        '<td>' + vt(g(9)) + '</td>' +
+        '<td>' + vt(g(10)) + '</td>' +
+        '<td>' + vt(g(11)) + '</td>' +
+        '<td>' + vt(g(12)) + '</td>' +
+        '<td>' + vt(g(13)) + '</td>' +
+        '<td class="' + cls + '">' + (res || 'Pending') + '</td>' +
+        '<td>' + g(15) + '</td>' +
+        '</tr>';
     }
     h += '</tbody></table></div>';
     out.innerHTML = h;
